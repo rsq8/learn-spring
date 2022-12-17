@@ -6,6 +6,7 @@ import com.learnspring.repository.SpeakerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
 
 import static java.lang.System.out;
@@ -21,6 +22,11 @@ public class SpeakerServiceImpl implements SpeakerService {
     public SpeakerServiceImpl (SpeakerRepository sRepository){
         out.println("SpeakerServiceImpl repository constructor");
         repository = sRepository;
+    }
+
+    @PostConstruct
+    private void initialize(){
+        out.println("called after constructors");
     }
 
     @Override
