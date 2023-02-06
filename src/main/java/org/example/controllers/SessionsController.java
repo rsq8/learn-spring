@@ -1,11 +1,13 @@
 package org.example.controllers;
 
+import org.example.exceptions.SessionNotFoundException;
 import org.example.models.Session;
-import org.example.repositories.SessionRepository;
-import org.springframework.beans.BeanUtils;
+import org.example.services.SessionServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -13,37 +15,37 @@ import java.util.List;
 @RequestMapping("/api/sessions")
 public class SessionsController {
     @Autowired
-    private SessionRepository sessionRepository;
+    private SessionServices sessionServices;
 
     @GetMapping
-    public List<Session> list(){
-        return sessionRepository.findAll();
+    public ResponseEntity<List<Session>> list(){
+        return new ResponseEntity<List<Session>>(sessionServices.list(), HttpStatus.OK);
     }
 
     @GetMapping
     @RequestMapping("{id}")
-    public Session get(@PathVariable Long id){
-        return sessionRepository.getOne(id);
+    public ResponseEntity<Session> get(@PathVariable Long id){
+        try{
+            return new ResponseEntity<Session>(sessionServices.get(id), HttpStatus.OK);
+        } catch (SessionNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "The session does not Exist");
+        }
+        //return sessionRepository.getOne(id);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Session create(@RequestBody final Session session) {
-        return sessionRepository.saveAndFlush(session);
+        return sessionServices.addSession(session);
     }
 
     @RequestMapping(value = "{id}", method = RequestMethod.DELETE)
     public void delete(@PathVariable Long id) {
-        //Add check for child records before delete
-        sessionRepository.deleteById(id);
+        sessionServices.deleteSession(id);
     }
 
     @RequestMapping(value = "{id}", method = RequestMethod.PUT)
     public Session update(@PathVariable Long id, @RequestBody Session session) {
-        //put or patch may be used. put replaces all, patch replaces parts.
-        Session currentSession = sessionRepository.getOne(id);
-        //TODO: Add validation that all properties are passed in, otherwise retuen a 400 bad payload error
-        BeanUtils.copyProperties(session, currentSession, "session_id");
-        return sessionRepository.saveAndFlush(currentSession);
+        return sessionServices.updateSession(id,session);
     }
 }

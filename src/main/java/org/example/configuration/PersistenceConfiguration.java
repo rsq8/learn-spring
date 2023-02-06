@@ -13,6 +13,8 @@ public class PersistenceConfiguration {
     public DataSource dataSource() {
         DataSourceBuilder dsb = DataSourceBuilder.create();
         dsb.url("jdbc:postgresql://localhost:5432/conference_app");
+        dsb.username("postgres");
+        dsb.password("Welcome");
         return dsb.build();
     }
 }
